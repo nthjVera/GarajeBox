@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-reverse-engineering PUBLIC "-//Hibernate/Hibernate Reverse Engineering DTD 3.0//EN" "http://hibernate.org/dtd/hibernate-reverse-engineering-3.0.dtd" >
+
+<hibernate-reverse-engineering>
+  <table-filter match-catalog="garagebox" match-name="citas"/>
+  <table-filter match-catalog="garagebox" match-name="conversaciones"/>
+  <table-filter match-catalog="garagebox" match-name="facturas"/>
+  <table-filter match-catalog="garagebox" match-name="mecanicos_citas"/>
+  <table-filter match-catalog="garagebox" match-name="mensajes"/>
+  <table-filter match-catalog="garagebox" match-name="usuarios"/>
+  <table-filter match-catalog="garagebox" match-name="seguimiento"/>
+  <table-filter match-catalog="garagebox" match-name="vehiculos"/>
+</hibernate-reverse-engineering>

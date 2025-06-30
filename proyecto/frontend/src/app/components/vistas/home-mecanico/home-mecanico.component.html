@@ -1,0 +1,308 @@
+<div class="container-fluid">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-custom">
+        <div class="container-fluid">
+            <button class="btn btn-outline-primary me-2" (click)="toggleSidebar()" aria-label="Abrir menú">
+                <i class="bi bi-list"></i>
+            </button>
+            <span class="navbar-brand">Panel Mecánico</span>
+            <div class="d-flex align-items-center ms-auto">
+                <!-- User Menu -->
+                <div class="dropdown">
+                    <div class="d-flex align-items-center user-info" id="userMenuDropdown" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        <img [src]="usuario?.fotoPerfil || 'https://ui-avatars.com/api/?name=' + (usuario?.nombre || 'U')"
+                            class="user-avatar rounded-circle" alt="avatar" width="40" height="40" />
+                        <span class="user-name ms-2">{{ usuario?.nombre }}</span>
+                        <i class="bi bi-caret-down-fill ms-1"></i>
+                    </div>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuDropdown">
+                        <li>
+                            <a class="dropdown-item" (click)="logout()">
+                                <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="offcanvas offcanvas-start sidebar" [class.show]="showSidebar" tabindex="-1" id="sidebar"
+        aria-labelledby="sidebarLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title sidebar-title" id="sidebarLabel">Opciones</h5>
+            <button type="button" class="btn-close close-btn" aria-label="Close" (click)="toggleSidebar()"></button>
+        </div>
+        <div class="offcanvas-body">
+            <ul class="list-group">
+                <li class="list-group-item list-group-item-action" [class.active]="activeSection === 'citas'"
+                    (click)="setActiveSection('citas')">
+                    <i class="bi bi-calendar-check"></i> Mis trabajos
+                </li>
+                <li class="list-group-item list-group-item-action" [class.active]="activeSection === 'onhold'"
+                    (click)="setActiveSection('onhold')">
+                    <i class="bi bi-hourglass-split"></i> Mi trabajo activo
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content container">
+        <!-- Citas -->
+        <ng-container *ngIf="activeSection === 'citas'">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="section-title">Mis trabajos
+                    <button class="btn btn-link p-0 ms-2 align-baseline" (click)="cargarCitas()" title="Recargar citas">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </h2>
+            </div>
+            <!-- Buscador para Citas -->
+            <div class="input-group mb-4">
+                <input type="text" class="form-control" placeholder="Buscar por cliente, matrícula o estado"
+                    [(ngModel)]="busquedaCitas" (input)="buscarCitas()" />
+                <button class="btn btn-outline-primary" type="button" (click)="buscarCitas()">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+            </div>
+            <!-- Filtros de Citas -->
+            <div class="btn-group mb-4" role="group" aria-label="Filtros de citas">
+                <button type="button" class="btn btn-outline-primary" [class.active]="activeCitaFilter === 'todas'"
+                    (click)="activeCitaFilter = 'todas'; filtrarCitas('todas')">
+                    Todas
+                </button>
+                <button type="button" class="btn btn-outline-primary" [class.active]="activeCitaFilter === 'Pendiente'"
+                    (click)="activeCitaFilter = 'Pendiente'; filtrarCitas('Pendiente')">
+                    Pendientes
+                </button>
+                <button type="button" class="btn btn-outline-primary" [class.active]="activeCitaFilter === 'En Proceso'"
+                    (click)="activeCitaFilter = 'En Proceso'; filtrarCitas('En Proceso')">
+                    En Proceso
+                </button>
+                <button type="button" class="btn btn-outline-primary" [class.active]="activeCitaFilter === 'Finalizada'"
+                    (click)="activeCitaFilter = 'Finalizada'; filtrarCitas('Finalizada')">
+                    Finalizadas
+                </button>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-4" *ngFor="let cita of citasFiltradas">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ cita.vehiculos.matricula }}</h5>
+                            <p class="card-text">
+                                
+                                <strong>Cita ID:</strong>{{cita.idCita}}<br />
+                                <strong>Fecha:</strong> {{ cita.fechaHora | date: 'short' }}<br />
+                                <strong>Descripción:</strong> {{ cita.descripcion || 'N/A' }}<br />
+                                <strong>Estado:</strong> {{ cita.estado }}<br />
+                                <strong>Cliente:</strong> {{ cita.usuarios.nombre || 'N/A' }}<br />
+                                <strong>Vehículo:</strong>{{ cita.vehiculos.modelo ||
+                                'N/A' }} - {{
+                                cita.vehiculos.marca || 'N/A' }}<br />
+                            </p>
+
+                            <button *ngIf="cita.estado === 'Asignada'" class="btn btn-sm btn-success"
+                                [disabled]="tieneCitaEnProceso()" (click)="iniciarCita(cita)">
+                                <i class="bi bi-play-fill"></i> Iniciar
+                            </button>
+                            <button *ngIf="cita.estado === 'Asignada' || cita.estado === 'En Proceso'"
+                                class="btn btn-sm btn-warning ms-2" (click)="noAsignarCita(cita)">
+                                <i class="bi bi-person-x"></i> Designar
+                            </button>
+                            <button *ngIf="cita.estado === 'Asignada' || cita.estado === 'En Proceso'"
+                                class="btn btn-sm btn-danger ms-2" (click)="cancelarCita(cita)">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="citasFiltradas.length === 0" class="alert alert-info mt-3">
+                No hay citas que coincidan con el filtro seleccionado.
+            </div>
+        </ng-container>
+
+        <!-- On Hold -->
+        <ng-container *ngIf="activeSection === 'onhold'">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="section-title">Mi trabajo Activo</h2>
+                <button class="btn btn-outline-primary" (click)="onEditCita(citaOnHold!)">
+                    <i class="bi bi-pencil"></i> Editar Seguimientos
+                </button>
+            </div>
+            <div *ngIf="citaOnHold; else noOnHold">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ citaOnHold.vehiculos.matricula }}</h5>
+                        <p class="card-text">
+                            <strong>Cita ID:</strong> {{ citaOnHold.idCita }}<br />
+                            <strong>Fecha:</strong> {{ citaOnHold.fechaHora | date: 'short' }}<br />
+                            <strong>Descripción:</strong> {{ citaOnHold.descripcion || 'N/A' }}<br />
+                            <strong>Estado:</strong> {{ citaOnHold.estado }}<br />
+                            <strong>Cliente:</strong> {{ citaOnHold.usuarios.nombre || 'N/A' }}<br />
+                            <strong>Vehículo:</strong> {{
+                            citaOnHold.vehiculos.modelo || 'N/A' }} - {{ citaOnHold.vehiculos.marca || 'N/A' }}<br />
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Seguimientos en tiempo real -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Seguimiento en tiempo real</h5>
+                        <ng-container *ngIf="!seguimientoFinalizado && seguimientosOnHold.length > 0">
+                            <div class="mb-3">
+                                <div class="bg-light p-2 rounded">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>Descripción:</strong> {{
+                                            seguimientosOnHold[seguimientoActualIndex].descripcion! }}<br>
+
+                                            <strong>Estado:</strong> {{
+                                            seguimientosOnHold[seguimientoActualIndex].estado! }}<br>
+                                            <small class="text-muted">Actualizado: {{
+                                                seguimientosOnHold[seguimientoActualIndex].fechaActualizacion! |
+                                                date:'short' }}</small>
+                                            <!-- Mostrar imagen si existe -->
+                                            <div *ngIf="seguimientosOnHold[seguimientoActualIndex].imagenUrl" class="w-100 mt-2">
+                                                <img [src]="'http://localhost:8080' + seguimientosOnHold[seguimientoActualIndex].imagenUrl"
+                                                    alt="Imagen seguimiento"
+                                                    style="max-width: 200px; max-height: 150px;">
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <button class="btn btn-success btn-sm me-2"
+                                                (click)="finalizarSeguimientoConImagen(seguimientosOnHold[seguimientoActualIndex], seguimientoActualIndex)">
+                                                <i class="bi bi-check-circle"></i> Finalizar
+                                            </button>
+                                            <button class="btn btn-info btn-sm me-2"
+                                                (click)="cambiarEstadoSeguimiento(seguimientosOnHold[seguimientoActualIndex], 'Pieza Cambiada')">
+                                                <i class="bi bi-tools"></i> Pieza Cambiada
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <!-- Añade debajo el input file solo para finalizar -->
+                                    <input *ngIf="mostrarInputImagen && seguimientoActualIndex === indexInputImagen"
+                                        type="file" class="form-control mt-2 mb-2"
+                                        (change)="onFileSelectedOnHold($event)" accept="image/*" />
+                                </div>
+                            </div>
+                        </ng-container>
+                        <div *ngIf="seguimientoFinalizado" class="alert alert-success mt-3">
+                            Todos los seguimientos han sido finalizados o cancelados.
+                        </div>
+                        <button class="btn btn-primary mt-3" [disabled]="!seguimientoFinalizado"
+                            (click)="abrirModalFactura()">
+                            <i class="bi bi-flag"></i> Finalizar Cita
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal para editar Cita -->
+            <div class="modal fade" [class.show]="editingCita" [style.display]="editingCita ? 'block' : 'none'"
+                tabindex="-1" role="dialog" aria-hidden="!editingCita">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <!-- Cabecera del Modal -->
+                        <div class="modal-header">
+                            <h5 class="modal-title">Editar Cita</h5>
+                            <button type="button" class="btn-close" aria-label="Close"
+                                (click)="cerrarModalCita()"></button>
+                        </div>
+                        <!-- Cuerpo del Modal -->
+                        <div class="modal-body" *ngIf="editingCita">
+                            <div class="mb-3">
+                                <label for="descripcionCita" class="form-label">Descripción de la cita:</label>
+                                <input type="text" id="descripcionCita" class="form-control"
+                                    [value]="editingCita.descripcion" readonly tabindex="-1" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Seguimientos existentes:</label>
+                                <div *ngFor="let seguimiento of seguimientosExistentes; let i = index"
+                                    class="input-group mb-2">
+                                    <input type="text" class="form-control mb-1"
+                                        [(ngModel)]="seguimientosExistentes[i].descripcion"
+                                        placeholder="Descripción del seguimiento" />
+                                    <select class="form-select mb-1" [(ngModel)]="seguimientosExistentes[i].estado">
+                                        <option value="En Proceso">En Proceso</option>
+                                        <option value="Pieza Cambiada">Pieza Cambiada</option>
+                                        <option value="Finalizado">Finalizado</option>
+                                    </select>
+                                    <button class="btn btn-outline-danger" type="button"
+                                        (click)="deleteSeguimiento(seguimientosExistentes[i].idSeguimiento!)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+
+                                </div>
+                            </div>
+                            <!-- Nuevos seguimientos -->
+                            <div class="mb-3">
+                                <label class="form-label">Añadir nuevos seguimientos:</label>
+                                <button class="btn btn-sm btn-outline-success mb-2" (click)="addSeguimientoField()">
+                                    <i class="bi bi-plus"></i> Añadir seguimiento
+                                </button>
+                                <div *ngFor="let seguimiento of nuevosSeguimientos; let i = index"
+                                    class="input-group mb-2">
+                                    <input type="text" class="form-control" [(ngModel)]="seguimiento.descripcion"
+                                        placeholder="Descripción del seguimiento" />
+                                    <select class="form-select" [(ngModel)]="seguimiento.estado">
+                                        <option value="En Proceso">En Proceso</option>
+                                        <option value="Pieza Cambiada">Pieza Cambiada</option>
+                                        <option value="Finalizado">Finalizado</option>
+                                    </select>
+                                    <button class="btn btn-outline-danger" type="button"
+                                        (click)="removeSeguimientoField(i)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Pie del Modal -->
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary"
+                                    (click)="cerrarModalCita()">Cancelar</button>
+                                <button type="button" class="btn btn-primary" (click)="guardarCitaEditada()">
+                                    Guardar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ng-template #noOnHold>
+                <div class="alert alert-info mt-3">
+                    No tienes ninguna cita activa actualmente.
+                </div>
+            </ng-template>
+            <!-- ...dentro de la sección On Hold... -->
+            <ng-container *ngIf="citaOnHold && citaOnHold.idConversacion">
+                <app-chat [idConversacion]="citaOnHold.idConversacion" [usuario]="usuario!"></app-chat>
+            </ng-container>
+
+            <!-- Modal para introducir el monto -->
+            <div class="modal fade" [class.show]="showFacturaModal"
+                [style.display]="showFacturaModal ? 'block' : 'none'">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Generar Factura</h5>
+                            <button type="button" class="btn-close" (click)="cerrarModalFactura()"></button>
+                        </div>
+                        <div class="modal-body">
+                            <label>Monto total:</label>
+                            <input type="number" class="form-control" [(ngModel)]="montoFactura" min="0" required>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" (click)="cerrarModalFactura()">Cancelar</button>
+                            <button class="btn btn-primary" (click)="finalizarCitaConFactura()">Finalizar y generar
+                                factura</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+    </div>
+</div>

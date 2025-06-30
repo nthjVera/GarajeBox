@@ -1,0 +1,322 @@
+<div class="container-fluid">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-custom">
+    <div class="container-fluid">
+      <button class="btn btn-outline-primary me-2" (click)="toggleSidebar()" aria-label="Abrir menú">
+        <i class="bi bi-list"></i>
+      </button>
+      <span class="navbar-brand">Panel Administrador</span>
+      
+      <div class="d-flex align-items-center ms-auto">
+        <!-- User Menu -->
+        <div class="dropdown">
+          <div class="d-flex align-items-center user-info" id="userMenuDropdown" data-bs-toggle="dropdown"
+            aria-expanded="false">
+            <img [src]="usuario?.fotoPerfil || 'https://ui-avatars.com/api/?name=' + (usuario?.nombre || 'U')"
+              class="user-avatar rounded-circle" alt="avatar" width="40" height="40" />
+            <span class="user-name ms-2">{{ usuario?.nombre }}</span>
+            <i class="bi bi-caret-down-fill ms-1"></i>
+          </div>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuDropdown">
+            <li>
+              <a class="dropdown-item" (click)="logout()">
+                <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Sidebar -->
+  <div class="offcanvas offcanvas-start sidebar" [class.show]="showSidebar" tabindex="-1" id="sidebar"
+    aria-labelledby="sidebarLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title sidebar-title" id="sidebarLabel">Opciones</h5>
+      <button type="button" class="btn-close close-btn" aria-label="Close" (click)="toggleSidebar()"></button>
+    </div>
+    <div class="offcanvas-body">
+      <ul class="list-group">
+        <li class="list-group-item list-group-item-action" [class.active]="activeSection === 'usuarios'"
+          (click)="setActiveSection('usuarios')">
+          <i class="bi bi-people"></i> Gestionar usuarios
+        </li>
+        <li class="list-group-item list-group-item-action" [class.active]="activeSection === 'citas'"
+          (click)="setActiveSection('citas')">
+          <i class="bi bi-calendar-check"></i> Todas las citas
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content container">
+    <!-- Usuarios -->
+    <ng-container *ngIf="activeSection === 'usuarios'">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title">Usuarios</h2>
+      </div>
+
+      <!-- Buscador para Usuarios -->
+      <div class="input-group mb-4">
+        <input type="text" class="form-control" placeholder="Buscar por nombre" [(ngModel)]="busquedaUsuarios"
+          (input)="buscarUsuarios()" />
+        <button class="btn btn-outline-primary" type="button" (click)="buscarUsuarios()">
+          <i class="bi bi-search"></i> Buscar
+        </button>
+      </div>
+
+      <!-- Botonera de filtros para Usuarios -->
+      <div class="btn-group mb-4" role="group" aria-label="Filtros de usuarios">
+        <button type="button" class="btn btn-outline-primary" [class.active]="activeFilter === 'todos'"
+          (click)="activeFilter = 'todos'; filtrarUsuarios('todos')">
+          Todos
+        </button>
+        <button type="button" class="btn btn-outline-primary" [class.active]="activeFilter === 'Administrador'"
+          (click)="activeFilter = 'Administrador'; filtrarUsuarios('Administrador')">
+          Administradores
+        </button>
+        <button type="button" class="btn btn-outline-primary" [class.active]="activeFilter === 'Mecanico'"
+          (click)="activeFilter = 'Mecanico'; filtrarUsuarios('Mecanico')">
+          Mecánicos
+        </button>
+        <button type="button" class="btn btn-outline-primary" [class.active]="activeFilter === 'Cliente'"
+          (click)="activeFilter = 'Cliente'; filtrarUsuarios('Cliente')">
+          Clientes
+        </button>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-4" *ngFor="let user of usuariosFiltrados">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">{{ user.nombre }}</h5>
+              <p class="card-text">
+                <strong>Email:</strong> {{ user.email }}<br />
+                <strong>Rol:</strong> {{ user.tipoUsuario }}
+              </p>
+              <div class="d-flex justify-content-between">
+                <button class="btn btn-sm btn-outline-secondary" (click)="onEditUsuario(user)">
+                  <i class="bi bi-pencil"></i> Editar
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="onDeleteUsuario(user.idUsuario!)">
+                  <i class="bi bi-trash"></i> Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="usuariosFiltrados.length === 0" class="alert alert-info mt-3">
+        No hay usuarios que coincidan con el filtro seleccionado.
+      </div>
+      <!-- Modal para editar Usuario (se muestra solo si editingUser no es null) -->
+      <div class="modal fade" [class.show]="editingUser" [style.display]="editingUser ? 'block' : 'none'" tabindex="-1"
+        role="dialog" aria-hidden="!editingUser">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <!-- Cabecera del Modal -->
+            <div class="modal-header">
+              <h5 class="modal-title">Editar Usuario</h5>
+              <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()"></button>
+            </div>
+
+            <!-- Cuerpo del Modal -->
+            <div class="modal-body" *ngIf="editingUser">
+              <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre:</label>
+                <input type="text" id="nombre" class="form-control" [(ngModel)]="editingUser.nombre" name="nombre" />
+              </div>
+              <div class="mb-3">
+                <label for="email" class="form-label">Email:</label>
+                <input type="email" id="email" class="form-control" [(ngModel)]="editingUser.email" name="email" />
+              </div>
+              <div class="mb-3">
+                <label for="tipoUsuario" class="form-label">Tipo de Usuario:</label>
+                <select id="tipoUsuario" class="form-select" [(ngModel)]="editingUser.tipoUsuario" name="tipoUsuario">
+                  <option value="Administrador">Administrador</option>
+                  <option value="Mecanico">Mecánico</option>
+                  <option value="Cliente">Cliente</option>
+                </select>
+                <div class="mb-3">
+                  <label for="telefono" class="form-label">Telefono:</label>
+                  <input type="tel" id="telefono" class="form-control" [(ngModel)]="editingUser.telefono" name="telefono" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Pie del Modal -->
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+              <button type="button" class="btn btn-primary" (click)="guardarUsuarioEditado()">
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Citas -->
+    <ng-container *ngIf="activeSection === 'citas'">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title">Citas<button class="btn btn-link p-0 ms-2 align-baseline" (click)="cargarCitas()" title="Recargar citas">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button></h2>
+        
+      </div>
+
+      <!-- Buscador para Citas -->
+      <div class="input-group mb-4">
+        <input type="text" class="form-control" placeholder="Buscar por cliente, matrícula o estado"
+          [(ngModel)]="busquedaCitas" (input)="buscarCitas()" />
+        <button class="btn btn-outline-primary" type="button" (click)="buscarCitas()">
+          <i class="bi bi-search"></i> Buscar
+        </button>
+      </div>
+
+      <!-- Botonera de filtros para Citas -->
+      <div class="btn-group mb-4" role="group" aria-label="Filtros de citas">
+        <button type="button" class="btn btn-outline-primary" [class.active]="activeCitaFilter === 'todas'"
+          (click)="activeCitaFilter = 'todas'; filtrarCitas('todas')">
+          Todas
+        </button>
+        <button type="button" class="btn btn-outline-primary" [class.active]="activeCitaFilter === 'Pendiente'"
+          (click)="activeCitaFilter = 'Pendiente'; filtrarCitas('Pendiente')">
+          Pendientes
+        </button>
+        <button type="button" class="btn btn-outline-primary" [class.active]="activeCitaFilter === 'En Proceso'"
+          (click)="activeCitaFilter = 'En Proceso'; filtrarCitas('En Proceso')">
+          En Proceso
+        </button>
+        <button type="button" class="btn btn-outline-primary" [class.active]="activeCitaFilter === 'Finalizada'"
+          (click)="activeCitaFilter = 'Finalizada'; filtrarCitas('Finalizada')">
+          Finalizadas
+        </button>
+        <button type="button" class="btn btn-outline-primary" [class.active]="activeCitaFilter === 'Cancelada'"
+          (click)="activeCitaFilter = 'Cancelada'; filtrarCitas('Cancelada')">
+          Canceladas
+        </button>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-4" *ngFor="let cita of citasFiltradas">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Cita #{{ cita.idCita }}</h5>
+              <p class="card-text">
+                <strong>Fecha:</strong> {{ cita.fechaHora | date: 'short' }}<br />
+                <strong>Descripción:</strong> {{ cita.descripcion || 'N/A' }}<br />
+                <strong>Estado:</strong> {{ cita.estado }}<br />
+                <strong>Cliente:</strong> {{ cita.usuarios.nombre || 'N/A' }}<br />
+                <strong>Vehículo:</strong> {{ cita.vehiculos.matricula }} - {{ cita.vehiculos.modelo || 'N/A' }} - {{
+                cita.vehiculos.marca || 'N/A' }}<br />
+                <strong>Mecánico:</strong> {{ cita.mecanico?.nombre || 'Sin asignar' }}<br />
+              </p>
+              <div class="d-flex justify-content-between">
+                <button class="btn btn-sm btn-outline-secondary" (click)="onEditCita(cita)">
+                  <i class="bi bi-pencil"></i> Asignar mecánico y seguimiento
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="onDeleteCita(cita.idCita)">
+                  <i class="bi bi-trash"></i> Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="citasFiltradas.length === 0" class="alert alert-info mt-3">
+        No hay citas que coincidan con el filtro seleccionado.
+      </div>
+
+      <!-- Modal para editar Cita -->
+      <div class="modal fade" [class.show]="editingCita" [style.display]="editingCita ? 'block' : 'none'" tabindex="-1"
+        role="dialog" aria-hidden="!editingCita">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <!-- Cabecera del Modal -->
+            <div class="modal-header">
+              <h5 class="modal-title">Editar Cita</h5>
+              <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModalCita()"></button>
+            </div>
+            <!-- Cuerpo del Modal -->
+            <div class="modal-body" *ngIf="editingCita">
+              <div class="mb-3">
+                <label for="mecanico" class="form-label">Asignar Mecánico:</label>
+                <select id="mecanico" class="form-select" [(ngModel)]="editingCita.idMecanico" name="mecanico">
+                  <option [ngValue]="null">Sin asignar</option>
+                  <option *ngFor="let mecanico of mecanicos" [ngValue]="mecanico.idUsuario">
+                    {{ mecanico.nombre }}
+                  </option>
+                </select>
+              </div>
+              <!-- ...dentro del modal de edición de cita... -->
+              <div class="mb-3">
+                <label for="estadoCita" class="form-label">Estado de la cita:</label>
+                <select id="estadoCita" class="form-select" [(ngModel)]="editingCita.estado" name="estadoCita">
+                  <option value="Pendiente">Pendiente</option>
+                  <option value="Asignada">Asignada</option>
+                  <option value="En Proceso">En Proceso</option>
+                  <option value="Finalizada">Finalizada</option>
+                  <option value="Cancelada">Cancelada</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="descripcionCita" class="form-label">Descripción de la cita:</label>
+                <input type="text" id="descripcionCita" class="form-control" [value]="editingCita.descripcion" readonly
+                  tabindex="-1" />
+              </div>
+
+              <!-- Seguimientos existentes -->
+              <div class="mb-3">
+                <label class="form-label">Seguimientos existentes:</label>
+
+                <div *ngFor="let seguimiento of seguimientosExistentes; let i = index" class="input-group mb-2">
+                  <input type="text" class="form-control mb-1" [(ngModel)]="seguimientosExistentes[i].descripcion"
+                    placeholder="Descripción del seguimiento" />
+                  <select class="form-select mb-1" [(ngModel)]="seguimientosExistentes[i].estado">
+                    <option value="En Proceso">En Proceso</option>
+                    <option value="Pieza Cambiada">Pieza Cambiada</option>
+                    <option value="Finalizado">Finalizado</option>
+                    <option value="Cancelada">Cancelada</option>
+                  </select>
+                  <button class="btn btn-sm btn-outline-danger"
+                    (click)="deleteSeguimiento(seguimientosExistentes[i].idSeguimiento!)"><i
+                      class="bi bi-trash"></i></button>
+                </div>
+
+              </div>
+              <!-- Nuevos seguimientos -->
+              <div class="mb-3">
+                <label class="form-label">Añadir nuevos seguimientos:</label>
+                <button class="btn btn-sm btn-outline-success mb-2" (click)="addSeguimientoField()">
+                  <i class="bi bi-plus"></i> Añadir seguimiento
+                </button>
+                <div *ngFor="let seguimiento of nuevosSeguimientos; let i = index" class="input-group mb-2">
+                  <input type="text" class="form-control" [(ngModel)]="seguimiento.descripcion"
+                    placeholder="Descripción del seguimiento" />
+                  <select class="form-select" [(ngModel)]="seguimiento.estado">
+                    <option value="En Proceso">En Proceso</option>
+                    <option value="Pieza Cambiada">Pieza Cambiada</option>
+                    <option value="Finalizado">Finalizado</option>
+                    <option value="Cancelada">Cancelada</option>
+                  </select>
+                  <button class="btn btn-outline-danger" type="button" (click)="removeSeguimientoField(i)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+              <!-- Pie del Modal -->
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="cerrarModalCita()">Cancelar</button>
+                <button type="button" class="btn btn-primary" (click)="guardarCitaEditada()">
+                  Guardar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>

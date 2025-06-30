@@ -1,0 +1,33 @@
+<div class="login-bg">
+  <div class="login-card-custom mx-auto">
+    <div class="login-icon-container mx-auto">
+      <div class="login-icon-bg">
+        <i class="bi bi-person-plus-fill login-icon"></i>
+      </div>
+    </div>
+    <h2 class="text-center mb-4 login-title">Regístrate</h2>
+    <form (ngSubmit)="onSubmit()">
+      <div *ngIf="error" class="alert alert-danger py-2 text-center">{{ error }}</div>
+      <div class="mb-3">
+        <label for="nombre" class="form-label login-label">Nombre</label>
+        <input id="nombre" type="text" [(ngModel)]="nombre" name="nombre" class="form-control login-input" required placeholder="Introduce tu nombre" />
+      </div>
+      <div class="mb-3">
+        <label for="email" class="form-label login-label">Correo electrónico</label>
+        <input id="email" type="email" [(ngModel)]="email" name="email" class="form-control login-input" required placeholder="Introduce tu correo" />
+      </div>
+      <div class="mb-3">
+        <label for="contrasena" class="form-label login-label">Contraseña</label>
+        <input id="contrasena" type="password" [(ngModel)]="contrasena" name="contrasena" class="form-control login-input" required placeholder="Introduce tu contraseña" />
+      </div>
+      <div class="mb-3">
+        <label for="telefono" class="form-label login-label">Teléfono</label>
+        <input id="telefono" type="tel" [(ngModel)]="telefono" name="telefono" class="form-control login-input" placeholder="Introduce tu teléfono" />
+      </div>
+      <button type="submit" class="btn btn-info w-100 text-white fw-bold mb-2">REGISTRARSE</button>
+      <div class="d-flex justify-content-between small mt-2">
+        <a class="link-primary" (click)="goToLogin()" style="cursor:pointer;">¿Ya tienes cuenta?</a>
+      </div>
+    </form>
+  </div>
+</div><p>register works!</p>

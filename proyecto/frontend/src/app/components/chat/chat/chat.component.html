@@ -1,0 +1,35 @@
+<!-- Botón flotante solo si modoFlotante -->
+<div class="chat-fab" (click)="toggleChat()" *ngIf="modoFlotante && !mostrarChat">
+  <i class="bi bi-chat-dots-fill"></i>
+  <span *ngIf="hayNuevoMensaje" class="chat-notification"></span>
+</div>
+
+<!-- Ventana flotante del chat -->
+<div [ngClass]="modoFlotante ? 'chat-float-window card shadow' : 'card shadow mb-3'"
+  *ngIf="!modoFlotante || mostrarChat">
+  <div class="chat-float-window card shadow" *ngIf="mostrarChat">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <span>Chat</span>
+      <button class="btn btn-sm btn-light" (click)="toggleChat()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div class="card-body" id="chat-mensajes">
+      <div *ngFor="let mensaje of mensajesChat">
+        <div
+          [ngClass]="{'text-end': mensaje.idRemitente === usuario.idUsuario, 'text-start': mensaje.idRemitente !== usuario.idUsuario}">
+          <span class="badge bg-secondary">
+            {{ mensaje.contenido }}
+            <i class="bi bi-check2-all ms-1" [ngClass]="mensaje.leido ? 'text-primary' : 'text-secondary'"></i>
+          </span>
+          <small class="text-muted ms-2">{{ mensaje.fechaEnvio | date:'shortTime' }}</small>
+        </div>
+      </div>
+    </div>
+    <div class="card-footer d-flex">
+      <input type="text" class="form-control me-2" [(ngModel)]="nuevoMensaje" (keyup.enter)="enviarMensajeChat()"
+        placeholder="Escribe un mensaje...">
+      <button class="btn btn-primary" (click)="enviarMensajeChat()" [disabled]="!nuevoMensaje.trim()">Enviar</button>
+    </div>
+  </div>
+</div>

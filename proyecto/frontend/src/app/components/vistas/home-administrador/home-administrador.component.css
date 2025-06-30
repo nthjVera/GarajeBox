@@ -1,0 +1,222 @@
+/* General Styles */
+:host {
+  display: block;
+  background: #e0e7ff; /* Fondo claro uniforme */
+  min-height: 100vh;
+  color: #4b5563;
+  font-family: 'Arial', sans-serif;
+  padding-bottom: 2rem; /* Espacio inferior para evitar cortes */
+}
+
+/* Navbar */
+.navbar {
+  background: #7c3aed; /* Fondo morado */
+  border-bottom: #7c3aed 0.3rem solid;
+  color: black;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1030;
+  padding: 0.8rem 1rem; /* Ajuste de altura */
+}
+
+.navbar .navbar-brand {
+  font-weight: bold;
+  font-size: 1.5rem;
+  margin-left: 0.5rem;
+}
+
+.navbar .btn-outline-primary {
+  color: #0ea5e9;
+  border-color: #7c3aed;
+}
+
+.navbar .btn-outline-primary:hover {
+  background: #fff;
+  color: #7c3aed;
+}
+
+.navbar .dropdown-menu {
+  background: #f3f4f6;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.navbar .dropdown-item {
+  color: #4b5563;
+}
+
+.navbar .dropdown-item:hover {
+  background: #e0e7ff;
+  color: #7c3aed;
+}
+/* Sidebar */
+
+.offcanvas {
+  background: #f3f4f6;
+  color: #4b5563;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.offcanvas-header {
+  background: #7c3aed;
+  color: #fff;
+}
+
+.offcanvas-title {
+  font-weight: bold;
+}
+
+.list-group-item {
+  background: #fff;
+  border: none;
+  color: #4b5563;
+  transition: background 0.3s, color 0.3s;
+}
+
+.list-group-item:hover {
+  background: #e0e7ff;
+  color: #7c3aed;
+}
+
+.list-group-item.active {
+  background: #7c3aed;
+  color: #fff;
+}
+
+/* Main Content */
+.container {
+  padding-top: 10rem; /* Espacio para el navbar fijo */
+}
+
+.container h2 {
+  color: #7c3aed;
+  font-weight: bold;
+}
+
+.container p {
+  color: #6b7280;
+}
+
+.btn-primary {
+  background: #38bdf8;
+  border: none;
+  border-radius: 1.5rem;
+  font-size: 1rem;
+  padding: 0.5rem 1.5rem;
+  transition: background 0.3s;
+}
+
+.btn-primary:hover {
+  background: #0ea5e9;
+}
+
+/* Cards */
+.card {
+  border: none;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.card .card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #374151;
+}
+
+.card .card-text {
+  font-size: 0.95rem;
+  color: #6b7280;
+}
+
+.card .btn {
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+}
+
+.card .btn-outline-secondary {
+  color: #6366f1;
+  border-color: #6366f1;
+}
+
+.card .btn-outline-secondary:hover {
+  background: #6366f1;
+  color: #ffffff;
+}
+
+.card .btn-outline-danger {
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+.card .btn-outline-danger:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+/* Modal grande y moderno */
+.modal-dialog {
+  max-width: 800px;
+}
+
+.modal-content {
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(60, 60, 120, 0.15);
+  border: none;
+  background: #f8fafc;
+}
+
+.modal-header {
+  background: #7c3aed;
+  color: #fff;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  border-bottom: none;
+}
+
+.modal-title {
+  font-weight: bold;
+  font-size: 1.3rem;
+}
+
+.modal-footer {
+  border-top: none;
+  background: #f3f4f6;
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+}
+
+.modal-body {
+  padding: 2rem 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .modal-dialog {
+    max-width: 98vw;
+    margin: 1rem;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 576px) {
+  .navbar .navbar-brand {
+    font-size: 1.2rem;
+  }
+
+  .btn-primary {
+    font-size: 0.9rem;
+    padding: 0.4rem 1rem;
+  }
+
+  .modal-content {
+    padding: 1rem;
+  }
+}
+
